@@ -1,1 +1,6 @@
-data/
+.idea/
+.vscode/
+lib/__pycache__
+model/__pycache__
+experiments/
+log/

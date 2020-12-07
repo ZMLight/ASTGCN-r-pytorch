@@ -37,7 +37,11 @@ Step 2: Process dataset
   python prepareData.py --config configurations/PEMS08_astgcn.conf
   ```
 
+- on NET01 dataset
 
+  ```shell
+  python prepareData.py --config configurations/NET01_astgcn.conf
+  ```
 
 # Train and Test
 
@@ -51,6 +55,12 @@ Step 2: Process dataset
 
   ```shell
   python train_ASTGCN_r.py --config configurations/PEMS08_astgcn.conf
+  ```
+
+- on NET01 dataset
+
+  ```shell
+  python train_ASTGCN_r.py --config configurations/NET01_astgcn.conf
   ```
 
   

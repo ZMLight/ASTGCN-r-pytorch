@@ -148,7 +148,7 @@ def train_main():
 
         for batch_index, batch_data in enumerate(train_loader):
 
-            encoder_inputs, labels = batch_data
+            encoder_inputs, labels = batch_data #  torch.Size([32, 307, 1, 12]) torch.Size([32, 307, 12])
 
             optimizer.zero_grad()
 
@@ -198,9 +198,9 @@ def predict_main(global_step, data_loader, data_target_tensor, _mean, _std, type
 
 if __name__ == "__main__":
 
-    # train_main()
+    train_main()
 
-    predict_main(31, test_loader, test_target_tensor, _mean, _std, 'test')
+    # predict_main(9, test_loader, test_target_tensor, _mean, _std, 'test')
 
 
 

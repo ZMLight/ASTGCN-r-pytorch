@@ -127,7 +127,7 @@ def read_and_generate_dataset(graph_signal_matrix_filename,
     target: np.ndarray,
             shape is (num_of_samples, num_of_vertices, num_for_predict)
     '''
-    data_seq = np.load(graph_signal_matrix_filename)['data']  # (sequence_length, num_of_vertices, num_of_features)
+    data_seq = np.load(graph_signal_matrix_filename)['data']  # (sequence_length, num_of_vertices, num_of_features)  (16992, 307, 3)
 
     all_samples = []
     for idx in range(data_seq.shape[0]):
@@ -150,10 +150,10 @@ def read_and_generate_dataset(graph_signal_matrix_filename,
             sample.append(day_sample)
 
         if num_of_hours > 0:
-            hour_sample = np.expand_dims(hour_sample, axis=0).transpose((0, 2, 3, 1))  # (1,N,F,T)
+            hour_sample = np.expand_dims(hour_sample, axis=0).transpose((0, 2, 3, 1))  # (1,N,F,T)  (12, 307, 3) -> (1, 307, 3, 12)
             sample.append(hour_sample)
 
-        target = np.expand_dims(target, axis=0).transpose((0, 2, 3, 1))[:, :, 0, :]  # (1,N,T)
+        target = np.expand_dims(target, axis=0).transpose((0, 2, 3, 1))[:, :, 0, :]  # (1,N,T) # predict the first value //which is total flow in traffic dataset// x->node1 in network flow dataset
         sample.append(target)
 
         time_sample = np.expand_dims(np.array([idx]), axis=0)  # (1,1)
@@ -162,21 +162,24 @@ def read_and_generate_dataset(graph_signal_matrix_filename,
         all_samples.append(
             sample)  # sampe：[(week_sample),(day_sample),(hour_sample),target,time_sample] = [(1,N,F,Tw),(1,N,F,Td),(1,N,F,Th),(1,N,Tpre),(1,1)]
 
-    split_line1 = int(len(all_samples) * 0.6)
+    split_line1 = int(len(all_samples) * 0.7) #all_samples size: 16969 = 16992 - (12 + 12) + 1 # 16992个时间片的数据能产生16969组数据
     split_line2 = int(len(all_samples) * 0.8)
 
+    print("start split!")
+
     training_set = [np.concatenate(i, axis=0)
-                    for i in zip(*all_samples[:split_line1])]  # [(B,N,F,Tw),(B,N,F,Td),(B,N,F,Th),(B,N,Tpre),(B,1)]
+                    for i in zip(*all_samples[:split_line1])]  # [(B,N,F,Tw),(B,N,F,Td),(B,N,F,Th),(B,N,Tpre),(B,1)] [(10181, 307, 3, 12), (10181, 307, 12), (10181, 1)]
+
     validation_set = [np.concatenate(i, axis=0)
                       for i in zip(*all_samples[split_line1: split_line2])]
     testing_set = [np.concatenate(i, axis=0)
                    for i in zip(*all_samples[split_line2:])]
 
-    train_x = np.concatenate(training_set[:-2], axis=-1)  # (B,N,F,T')
+    train_x = np.concatenate(training_set[:-2], axis=-1)  # (B,N,F,T') T' = Tw + Td + Th
     val_x = np.concatenate(validation_set[:-2], axis=-1)
     test_x = np.concatenate(testing_set[:-2], axis=-1)
 
-    train_target = training_set[-2]  # (B,N,T)
+    train_target = training_set[-2]  # (B,N,Tpre)
     val_target = validation_set[-2]
     test_target = testing_set[-2]
 
@@ -298,6 +301,6 @@ points_per_hour = int(data_config['points_per_hour'])
 num_for_predict = int(data_config['num_for_predict'])
 graph_signal_matrix_filename = data_config['graph_signal_matrix_filename']
 data = np.load(graph_signal_matrix_filename)
-data['data'].shape
+data['data'].shape  #  (16992, 307, 3)
 
 all_data = read_and_generate_dataset(graph_signal_matrix_filename, 0, 0, num_of_hours, num_for_predict, points_per_hour=points_per_hour, save=True)

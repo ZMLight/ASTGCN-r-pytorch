@@ -167,24 +167,24 @@ def load_graphdata_channel1(graph_signal_matrix_filename, num_of_hours, num_of_d
     print('load file:', filename)
 
     file_data = np.load(filename + '.npz')
-    train_x = file_data['train_x']  # (10181, 307, 3, 12)
-    train_x = train_x[:, :, 0:1, :]
+    train_x = file_data['train_x']  # (10181, 307, 3, 12) PEMS04
+    train_x = train_x[:, :, 0:1, :]  # (10181, 307, 1, 12) #use all features
     train_target = file_data['train_target']  # (10181, 307, 12)
 
-    val_x = file_data['val_x']
-    val_x = val_x[:, :, 0:1, :]
+    val_x = file_data['val_x']  # (3394, 307, 3, 12)
+    val_x = val_x[:, :, 0:1, :]  # (3394, 307, 1, 12)
     val_target = file_data['val_target']
 
     test_x = file_data['test_x']
     test_x = test_x[:, :, 0:1, :]
     test_target = file_data['test_target']
 
-    mean = file_data['mean'][:, :, 0:1, :]  # (1, 1, 3, 1)
-    std = file_data['std'][:, :, 0:1, :]  # (1, 1, 3, 1)
+    mean = file_data['mean'][:, :, 0:1, :]  # (1, 1, 1, 1)
+    std = file_data['std'][:, :, 0:1, :]  # (1, 1, 1, 1)
 
     # ------- train_loader -------
-    train_x_tensor = torch.from_numpy(train_x).type(torch.FloatTensor).to(DEVICE)  # (B, N, F, T)
-    train_target_tensor = torch.from_numpy(train_target).type(torch.FloatTensor).to(DEVICE)  # (B, N, T)
+    train_x_tensor = torch.from_numpy(train_x).type(torch.FloatTensor).to(DEVICE)  # (B, N, F, T) (Batch, NodeNumber, Feature, TimeSlice)
+    train_target_tensor = torch.from_numpy(train_target).type(torch.FloatTensor).to(DEVICE)  # (B, N, T) # Timeslice to predict Tp = 12
 
     train_dataset = torch.utils.data.TensorDataset(train_x_tensor, train_target_tensor)
 
